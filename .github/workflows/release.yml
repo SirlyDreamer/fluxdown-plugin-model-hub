@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - run: npm run release:prepare
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+
+  checks:
+    needs: validate-tag
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - id: release
+        run: npm run release:prepare
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+      - run: npm run pack
+      - run: npm run verify:package
+      - name: Upload assets to draft, then publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          PRERELEASE: ${{ steps.release.outputs.prerelease }}
+          BASENAME: ${{ steps.release.outputs.basename }}
+        run: |
+          set -euo pipefail
+          assets=("dist/$BASENAME.zip" "dist/$BASENAME.fxplug"
+                  "dist/$BASENAME.zip.sha256" "dist/$BASENAME.fxplug.sha256"
+                  "dist/SHA256SUMS")
+          if draft=$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft'); then
+            if [[ "$draft" != "true" ]]; then
+              echo "Release already published; create a new version instead of replacing assets."
+              exit 1
+            fi
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+          else
+            flags=()
+            if [[ "$PRERELEASE" == "true" ]]; then flags+=(--prerelease); fi
+            gh release create "$RELEASE_TAG" "${assets[@]}" --verify-tag --draft \
+              --title "$RELEASE_TAG" --notes-file dist/RELEASE_NOTES.md "${flags[@]}"
+          fi
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease="$PRERELEASE" \
+            --title "$RELEASE_TAG" --notes-file dist/RELEASE_NOTES.md
