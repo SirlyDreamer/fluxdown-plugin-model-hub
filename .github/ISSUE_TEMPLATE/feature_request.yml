@@ -1,0 +1,16 @@
+name: 功能建议
+description: 提出站点支持或下载体验改进
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: 使用场景
+      description: 描述希望解决的问题，以及当前的处理方式。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议的行为
+    validations:
+      required: true

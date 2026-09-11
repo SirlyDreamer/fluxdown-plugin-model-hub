@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+*.log
+*.zip
+*.fxplug
+.env
+.env.*
+!.env.example
+*.local.json
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

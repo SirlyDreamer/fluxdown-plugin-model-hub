@@ -1,0 +1,27 @@
+{
+  "name": "fluxdown-plugin-model-hub",
+  "version": "0.1.2",
+  "private": true,
+  "description": "Standalone FluxDown resolver for Hugging Face and ModelScope",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirlyDreamer/fluxdown-plugin-model-hub.git"
+  },
+  "homepage": "https://github.com/SirlyDreamer/fluxdown-plugin-model-hub#readme",
+  "bugs": { "url": "https://github.com/SirlyDreamer/fluxdown-plugin-model-hub/issues" },
+  "scripts": {
+    "check": "node scripts/check.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "test:quickjs": "node scripts/test-quickjs.cjs",
+    "test:live": "node scripts/smoke.cjs",
+    "pack": "node scripts/package.cjs",
+    "verify:package": "node scripts/verify-package.cjs",
+    "release:prepare": "node scripts/release.cjs"
+  },
+  "engines": { "node": ">=22" },
+  "devDependencies": {
+    "fflate": "0.8.3",
+    "quickjs-emscripten": "0.31.0"
+  }
+}

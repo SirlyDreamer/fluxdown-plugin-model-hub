@@ -1,0 +1,22 @@
+{
+  "identity": "model-hub@local",
+  "name": "Model Hub · 模型与数据集下载",
+  "version": "0.1.2",
+  "description": "从 Hugging Face、ModelScope 仓库链接列出文件，勾选或全选下载，保留目录结构，支持访问令牌。",
+  "minAppVersion": "0.1.44",
+  "resolvers": [{
+    "match": { "urls": ["https://huggingface.co/*", "https://www.huggingface.co/*", "https://modelscope.cn/*", "https://www.modelscope.cn/*"] },
+    "entry": "resolver.js",
+    "timeoutMs": 30000,
+    "multi": true
+  }],
+  "settings": [
+    { "key": "hfMirror", "title": "Hugging Face 镜像地址", "description": "可选，例如 https://hf-mirror.com；留空使用官方站点。粘贴官方链接后，经镜像列出文件并下载；需兼容 Hub API。镜像不发送 HF Token，私有或受限仓库请留空。", "type": "string", "default": "" },
+    { "key": "hfToken", "title": "Hugging Face Token", "description": "可选；在 huggingface.co/settings/tokens 获取有仓库读取权限的 Token。受限仓库须先在网站获准访问。", "type": "string", "widget": "password", "default": "" },
+    { "key": "msToken", "title": "ModelScope Token", "description": "可选；在 ModelScope 个人中心获取 SDK 访问令牌，仅发送到 modelscope.cn。", "type": "string", "widget": "password", "default": "" },
+    { "key": "revision", "title": "默认版本 / Default revision", "description": "分支、标签或提交。链接中的版本优先；留空使用 Hugging Face 的 main、ModelScope 的 master。", "type": "string", "default": "" },
+    { "key": "subdirectory", "title": "子目录 / Subdirectory", "description": "相对仓库根目录，例如 data/train。链接指定目录时优先使用链接；留空列出整个仓库。", "type": "string", "default": "" },
+    { "key": "includePatterns", "title": "包含规则 / Include patterns", "description": "按仓库完整相对路径匹配，每行一个，任一匹配即保留。支持 *、**、?；如 **/*.safetensors。留空包含全部。仅用于仓库清单。", "type": "string", "widget": "textarea", "default": "" },
+    { "key": "excludePatterns", "title": "排除规则 / Exclude patterns", "description": "每行一个；如 **/*.bin 或 .git*。排除优先，不会自动排除配置、README 或其他元文件。", "type": "string", "widget": "textarea", "default": "" }
+  ]
+}
